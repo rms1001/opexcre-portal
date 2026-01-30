@@ -749,7 +749,7 @@ const ReportsPage = ({ property }) => {
 // MAIN APP
 // ============================================
 
-export default function App() {
+export default function Portal() {
   const [currentPage, setCurrentPage] = useState('portfolio');
   const [selectedProperty, setSelectedProperty] = useState(properties[0]);
 
