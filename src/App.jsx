@@ -28,113 +28,103 @@ import Layout from './components/Layout';
 
 // Protected Route Component
 function ProtectedRoute({ children, requireAdmin = false }) {
-    const { currentUser, userProfile, loading } = useAuth();
+      const { currentUser, userProfile, loading } = useAuth();
 
   if (loading) {
-        return (
-                <div className="min-h-screen flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>div>
-                </div>div>
-              );
+          return (
+                    <div className="min-h-screen flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>div>
+                    </div>div>
+                  );
   }
-  
-    if (!currentUser) {
-          return <Navigate to="/login" replace />;
-    }
-  
-    if (requireAdmin && userProfile?.role !== 'admin') {
-          return <Navigate to="/portal" replace />;
-    }
-  
-    return <Layout>{children}</Layout>Layout>;
+    
+      if (!currentUser) {
+              return <Navigate to="/login" replace />;
+      }
+    
+      if (requireAdmin && userProfile?.role !== 'admin') {
+              return <Navigate to="/portal" replace />;
+      }
+    
+      return <Layout>{children}</Layout>Layout>;
+}
+
+// Public Route (redirect if already logged in)
+function PublicRoute({ children }) {
+      const { currentUser, userProfile, loading } = useAuth();
+    
+      if (loading) {
+              return (
+                        <div className="min-h-screen flex items-center justify-center">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>div>
+                        </div>div>
+                      );
+      }
+    
+      if (currentUser) {
+              return <Navigate to={userProfile?.role === 'admin' ? '/admin' : '/portal'} replace />;
+      }
+    
+      return children;
 }
 
 // Root redirect based on role
 function RootRedirect() {
-    const { currentUser, userProfile, loading } = useAuth();
-  
-    if (loading) {
-          return (
-                  <div className="min-h-screen flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>div>
-                  </div>div>
-                );
-    }
-  
-    if (!currentUser) {
-          return <Navigate to="/login" replace />;
-    }
-  
-    if (userProfile?.role === 'admin') {
-          return <Navigate to="/admin" replace />;
-    }
-  
-    return <Navigate to="/portal" replace />;
-}
-
-// Public Route (redirect to dashboard if logged in)
-function PublicRoute({ children }) {
-    const { currentUser, userProfile, loading } = useAuth();
-  
-    if (loading) {
-          return (
-                  <div className="min-h-screen flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>div>
-                  </div>div>
-                );
-    }
-  
-    if (currentUser) {
-          if (userProfile?.role === 'admin') {
-                  return <Navigate to="/admin" replace />;
-          }
-          return <Navigate to="/portal" replace />;
-    }
-  
-    return children;
+      const { currentUser, userProfile, loading } = useAuth();
+    
+      if (loading) {
+              return (
+                        <div className="min-h-screen flex items-center justify-center">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>div>
+                        </div>div>
+                      );
+      }
+    
+      if (!currentUser) {
+              return <Navigate to="/login" replace />;
+      }
+    
+      return <Navigate to={userProfile?.role === 'admin' ? '/admin' : '/portal'} replace />;
 }
 
 function AppRoutes() {
-    return (
-          <Routes>
-            {/* Root */}
-                <Route path="/" element={<RootRedirect />} />
-          
-            {/* Public Routes */}
-                <Route path="/login" element={<PublicRoute><Login /></PublicRoute>PublicRoute>} />
-                      <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>PublicRoute>} />
-                      
-                        {/* Admin Routes */}
-                            <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>ProtectedRoute>} />
-                                  <Route path="/admin/properties" element={<ProtectedRoute requireAdmin><AdminProperties /></ProtectedRoute>ProtectedRoute>} />
-                                        <Route path="/admin/properties/new" element={<ProtectedRoute requireAdmin><PropertyForm /></ProtectedRoute>ProtectedRoute>} />
-                                              <Route path="/admin/properties/:id/edit" element={<ProtectedRoute requireAdmin><PropertyForm /></ProtectedRoute>ProtectedRoute>} />
-                                                    <Route path="/admin/clients" element={<ProtectedRoute requireAdmin><AdminClients /></ProtectedRoute>ProtectedRoute>} />
-                                                          <Route path="/admin/documents" element={<ProtectedRoute requireAdmin><AdminDocuments /></ProtectedRoute>ProtectedRoute>} />
-                                                                <Route path="/admin/reports" element={<ProtectedRoute requireAdmin><AdminReports /></ProtectedRoute>ProtectedRoute>} />
-                                                                      <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><AdminSettings /></ProtectedRoute>ProtectedRoute>} />
-                                                                      
-                                                                        {/* Client Routes */}
-                                                                            <Route path="/portal" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>ProtectedRoute>} />
-                                                                                  <Route path="/portal/properties" element={<ProtectedRoute><ClientProperties /></ProtectedRoute>ProtectedRoute>} />
-                                                                                        <Route path="/portal/properties/:id" element={<ProtectedRoute><PropertyDetail /></ProtectedRoute>ProtectedRoute>} />
-                                                                                              <Route path="/portal/documents" element={<ProtectedRoute><ClientDocuments /></ProtectedRoute>ProtectedRoute>} />
-                                                                                                    <Route path="/portal/reports" element={<ProtectedRoute><ClientReports /></ProtectedRoute>ProtectedRoute>} />
-                                                                                                    
-                                                                                                      {/* Catch all */}
-                                                                                                          <Route path="*" element={<Navigate to="/" replace />} />
-                                                                                                      </Route>Routes>
-                                                                                                );
-                                                                                                }
-                                                                                              
-                                                                                              export default function App() {
-                                                                                                  return (
-                                                                                                  <BrowserRouter>
-                                                                                                        <AuthProvider>
-                                                                                                                <DataProvider>
-                                                                                                                          <AppRoutes />
-                                                                                                                  </DataProvider>DataProvider>
-                                                                                                          </AuthProvider>AuthProvider>
-                                                                                                    </BrowserRouter>BrowserRouter>
-                                                                                                );
-                                                                                                }</div>
+      return (
+              <Routes>
+                    <Route path="/" element={<RootRedirect />} />
+                    <Route path="/login" element={<PublicRoute><Login /></PublicRoute>PublicRoute>} />
+                          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>PublicRoute>} />
+                                
+                              {/* Admin Routes */}
+                                <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>ProtectedRoute>} />
+                                      <Route path="/admin/properties" element={<ProtectedRoute requireAdmin><AdminProperties /></ProtectedRoute>ProtectedRoute>} />
+                                            <Route path="/admin/properties/new" element={<ProtectedRoute requireAdmin><PropertyForm /></ProtectedRoute>ProtectedRoute>} />
+                                                  <Route path="/admin/properties/:id/edit" element={<ProtectedRoute requireAdmin><PropertyForm /></ProtectedRoute>ProtectedRoute>} />
+                                                        <Route path="/admin/clients" element={<ProtectedRoute requireAdmin><AdminClients /></ProtectedRoute>ProtectedRoute>} />
+                                                              <Route path="/admin/documents" element={<ProtectedRoute requireAdmin><AdminDocuments /></ProtectedRoute>ProtectedRoute>} />
+                                                                    <Route path="/admin/reports" element={<ProtectedRoute requireAdmin><AdminReports /></ProtectedRoute>ProtectedRoute>} />
+                                                                          <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><AdminSettings /></ProtectedRoute>ProtectedRoute>} />
+                                                                                
+                                                                              {/* Client Routes */}
+                                                                                <Route path="/portal" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>ProtectedRoute>} />
+                                                                                      <Route path="/portal/properties" element={<ProtectedRoute><ClientProperties /></ProtectedRoute>ProtectedRoute>} />
+                                                                                            <Route path="/portal/properties/:id" element={<ProtectedRoute><PropertyDetail /></ProtectedRoute>ProtectedRoute>} />
+                                                                                                  <Route path="/portal/documents" element={<ProtectedRoute><ClientDocuments /></ProtectedRoute>ProtectedRoute>} />
+                                                                                                        <Route path="/portal/reports" element={<ProtectedRoute><ClientReports /></ProtectedRoute>ProtectedRoute>} />
+                                                                                                              
+                                                                                                            {/* Catch all */}
+                                                                                                              <Route path="*" element={<Navigate to="/" replace />} />
+                                                                                                            </Route>Routes>
+                                                                                                    );
+                                                                                                      }
+                                                                                                  
+                                                                                                  export default function App() {
+                                                                                                        return (
+                                                                                                      <BrowserRouter>
+                                                                                                            <AuthProvider>
+                                                                                                                    <DataProvider>
+                                                                                                                              <AppRoutes />
+                                                                                                                        </DataProvider>DataProvider>
+                                                                                                                </AuthProvider>AuthProvider>
+                                                                                                          </BrowserRouter>BrowserRouter>
+                                                                                                    );
+                                                                                                      }</div>
